@@ -1,11 +1,38 @@
-const { Blog, Ustadz } = require('../models');
+const { Blog, Ustadz, User } = require('../models');
+const { Op } = require('sequelize');
 
 exports.getAll = async (req, res) => {
+    const { ustadzId, search, page = 1, limit = 10, sortBy = 'createdAt', order = 'asc' } = req.query;
+
+    const where = {};
+
+    if (ustadzId) {
+        where.ustadzId = ustadzId;
+    }
+
+    if (search) {
+        where.judul = {
+            [Op.like]: `%${search}%`
+        };
+    }
+
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+
     try {
-        const blogs = await Blog.findAll({ include: ['ustadz', 'creator'] });
+        const blogs = await Blog.findAll({
+            where,
+            include: [
+                { model: Ustadz, as: 'ustadz' },
+                { model: User, as: 'creator' }
+            ],
+            order: [[sortBy, order]],
+            limit: parseInt(limit),
+            offset
+        });
+
         res.json(blogs);
     } catch (err) {
-        res.status(500).json({ message: 'Gagal mengambil blog', error: err.message });
+        res.status(500).json({ message: 'Server error', error: err });
     }
 };
 

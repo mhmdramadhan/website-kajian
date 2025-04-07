@@ -1,11 +1,49 @@
-const { Kajian, Ustadz } = require('../models');
+const { Kajian, Ustadz, User } = require('../models');
+const { Op } = require('sequelize');
 
 exports.getAll = async (req, res) => {
+    const { ustadzId, tanggal, search, page = 1, limit = 10, sortBy = 'tanggal_waktu', order = 'asc' } = req.query;
+
+    const where = {
+        deletedAt: null // soft delete support
+    };
+
+    if (ustadzId) {
+        where.ustadzId = ustadzId;
+    }
+
+    if (tanggal) {
+        const dateStart = new Date(tanggal);
+        const dateEnd = new Date(tanggal);
+        dateEnd.setDate(dateEnd.getDate() + 1);
+        where.tanggal_waktu = {
+            [Op.gte]: dateStart,
+            [Op.lt]: dateEnd
+        };
+    }
+
+    if (search) {
+        where.judul = {
+            [Op.like]: `%${search}%`
+        };
+    }
+
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+
     try {
-        const kajian = await Kajian.findAll({ include: ['ustadz', 'creator'] });
-        res.json(kajian);
+        const list = await Kajian.findAll({
+            where,
+            include: [
+                { model: Ustadz, as: 'ustadz' },
+                { model: User, as: 'creator' }
+            ],
+            order: [[sortBy, order]],
+            limit: parseInt(limit),
+            offset
+        });
+        res.json(list);
     } catch (err) {
-        res.status(500).json({ message: 'Gagal mengambil data kajian', error: err.message });
+        res.status(500).json({ message: 'Server error', error: err });
     }
 };
 
@@ -29,7 +67,7 @@ exports.create = async (req, res) => {
             const ustadz = await Ustadz.findByPk(ustadzId);
             if (!ustadz) return res.status(404).json({ message: 'Ustadz tidak ditemukan' });
         }
-        
+
         // Validasi tanggal_waktu
         if (!tanggal_waktu) return res.status(400).json({ message: 'Tanggal dan waktu tidak boleh kosong' });
 

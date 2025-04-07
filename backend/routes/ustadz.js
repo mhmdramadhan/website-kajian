@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const ustadzController = require('../controllers/ustadzController');
-const { auth, isAdmin } = require('../middlewares/authMiddleware');
+const { auth, isAdmin, authorizeUstadzSelfOnly } = require('../middlewares/authMiddleware');
 const { uploadUstadz } = require('../middlewares/uploadMiddleware');
 
 // Hanya admin utama yang boleh buat/update/delete ustadz
@@ -19,6 +19,7 @@ router.put(
   auth,
   isAdmin,
   uploadUstadz.single('foto'),
+  authorizeUstadzSelfOnly,
   ustadzController.update
 );
 router.delete('/:id', auth, isAdmin, ustadzController.remove);
