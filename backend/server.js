@@ -10,7 +10,10 @@ const blogRoutes = require('./routes/blog');
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3001', // ganti dengan domain frontend anda
+    credentials: true
+}));
 app.use(express.json());
 
 // routes placeholder
