@@ -9,6 +9,7 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
+        console.log(email, password);
         const user = await User.findOne({ where: { email } });
         if (!user) return res.status(401).json({ message: 'Email tidak ditemukan' });
 
@@ -89,5 +90,19 @@ exports.register = async (req, res) => {
         });
     } catch (err) {
         res.status(500).json({ message: 'Terjadi kesalahan', error: err.message });
+    }
+};
+
+exports.me = async (req, res) => {
+    try {
+        const user = req.user; // dari token yang didecode di middleware
+        res.json({
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            ustadzId: user.ustadzId,
+        });
+    } catch (err) {
+        res.status(500).json({ message: "Gagal ambil user login", error: err.message });
     }
 };

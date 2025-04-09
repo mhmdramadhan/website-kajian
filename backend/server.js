@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const cookieParser = require('cookie-parser');
 const { sequelize } = require('./models');
 const authRoutes = require('./routes/auth');
 const ustadzRoutes = require('./routes/ustadz');
@@ -16,6 +17,7 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
+app.use(cookieParser());
 
 // routes placeholder
 app.get('/', (req, res) => res.send('API Kajian berjalan 🚀'));

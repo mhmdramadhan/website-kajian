@@ -3,10 +3,10 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const { Kajian, Blog } = require('../models');
 
 exports.auth = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ message: 'Token tidak ditemukan' });
-
-  const token = authHeader.split(' ')[1];
+  const token = req.cookies.token;
+  // console.log(req.cookies);
+  
+  if (!token) return res.status(401).json({ message: 'Token tidak ditemukan' });
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
