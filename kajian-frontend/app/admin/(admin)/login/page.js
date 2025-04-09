@@ -1,5 +1,5 @@
 import AuthForm from "@/components/ AuthForm";
-import '../admin.css'
+import '../../admin.css';
 
 export default function LoginPage() {
     return (
