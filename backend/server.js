@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth');
 const ustadzRoutes = require('./routes/ustadz');
 const kajianRoutes = require('./routes/kajian');
 const blogRoutes = require('./routes/blog');
+const dashboardRoutes = require('./routes/dashboard');
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use(express.json());
 app.get('/', (req, res) => res.send('API Kajian berjalan 🚀'));
 app.use('/uploads', express.static('uploads'));
 app.use('/api/auth', authRoutes);
+app.use('/dashboard', dashboardRoutes);
 app.use('/api/ustadz', ustadzRoutes);
 app.use('/api/kajian', kajianRoutes);
 app.use('/api/blog', blogRoutes);
