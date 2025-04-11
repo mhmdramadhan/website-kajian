@@ -25,6 +25,40 @@ exports.adminOverview = async (req, res) => {
             group: ['ustadzId']
         });
 
+        // === Tambahan: Top 5 Ustadz ===
+        const topUstadzRaw = await Kajian.findAll({
+            attributes: [
+                'ustadzId',
+                [sequelize.fn('COUNT', sequelize.col('Kajian.id')), 'totalKajian']
+            ],
+            include: { model: Ustadz, as: 'ustadz', attributes: ['nama'] },
+            group: ['ustadzId'],
+            order: [[sequelize.fn('COUNT', sequelize.col('Kajian.id')), 'DESC']],
+            limit: 5
+        });
+
+        const topUstadz = topUstadzRaw.map(item => ({
+            nama: item.ustadz?.nama || 'Tidak diketahui',
+            totalKajian: item.dataValues.totalKajian
+        }));
+
+        // === Tambahan: Kajian Terdekat ===
+        const kajianTerdekatRaw = await Kajian.findAll({
+            where: {
+                tanggal_waktu: {
+                    [Op.gte]: new Date()
+                }
+            },
+            order: [['tanggal_waktu', 'ASC']],
+            limit: 5
+        });
+
+        const kajianTerdekat = kajianTerdekatRaw.map(k => ({
+            judul: k.judul,
+            tanggal_waktu: k.tanggal_waktu
+        }));
+
+
         res.json({
             totalKajian,
             totalBlog,
@@ -36,7 +70,9 @@ exports.adminOverview = async (req, res) => {
             chartBlogPerUstadz: chartBlogPerUstadz.map(item => ({
                 nama: item.ustadz?.nama || 'Tidak diketahui',
                 jumlahBlog: item.dataValues.jumlahBlog
-            }))
+            })),
+            topUstadz,
+            kajianTerdekat
         });
     } catch (err) {
         res.status(500).json({ message: 'Gagal mengambil data dashboard', error: err.message });

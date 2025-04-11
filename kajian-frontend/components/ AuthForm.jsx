@@ -1,11 +1,14 @@
 'use client';
+
 import { useState } from 'react';
-import { useAuth } from "@/context/AuthContext";
+// import { useAuth } from "@/context/AuthContext";
+import { signIn } from "next-auth/react";
+import { useRouter } from 'next/navigation';
 
 export default function AuthForm() {
-    const { login } = useAuth();
     const [form, setForm] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
+    const router = useRouter();
 
     const handleChange = e => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -14,9 +17,19 @@ export default function AuthForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            console.log(form);
-            
-            await login(form.email, form.password);
+            const res = await signIn("credentials", {
+                redirect: false,
+                email: form.email, // harus sama dengan `credentials.email`
+                password: form.password, // harus sama dengan `credentials.password`
+                callbackUrl: "/admin/dashboard",
+            });
+
+            if (res.ok) {
+                console.log(res);
+                router.push("/admin/dashboard");
+            } else {
+                setError("Login gagal: email atau password salah");
+            }
         } catch (err) {
             console.log(err);
             setError(err.response?.data?.message || "Login gagal");

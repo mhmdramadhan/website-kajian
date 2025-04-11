@@ -1,7 +1,16 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth"; // file konfigurasi NextAuth kamu
+import { redirect } from "next/navigation";
 import AdminSidebar from '@/components/AdminSidebar';
 import AdminHeader from '@/components/AdminHeader';
 
-export default function AdminLayout({ children }) {
+export default async function AdminLayout({ children }) {
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+        redirect("/admin/login");
+    }
+
     return (
         <div className="flex">
             <AdminSidebar />
@@ -12,3 +21,4 @@ export default function AdminLayout({ children }) {
         </div>
     );
 }
+
