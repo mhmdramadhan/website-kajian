@@ -22,7 +22,7 @@ export default async function DashboardPage() {
             adminData = res.data;
 
         } else if (session.user.role === 'ustadz') {
-            const res = await api.get(`/dashboard/ustadz-overview?ustadzId=${session.user.ustadzId}`, {
+            const res = await api.get(`/dashboard/ustadz-overview/${session.user.ustadzId}`, {
                 headers: { Authorization: `Bearer ${session.user.token}` }
             });
             ustadzData = res.data;

@@ -81,7 +81,7 @@ exports.adminOverview = async (req, res) => {
 
 exports.ustadzOverview = async (req, res) => {
     try {
-        const ustadzId = req.query.ustadzId;
+        const ustadzId = req.params.id; // Ambil dari parameter URL
         const ustadz = await Ustadz.findByPk(ustadzId);
 
         if (!ustadz) {
@@ -91,7 +91,7 @@ exports.ustadzOverview = async (req, res) => {
         const jumlahKajian = await Kajian.count({ where: { ustadzId } });
         const jumlahBlog = await Blog.count({ where: { ustadzId } });
 
-        const kajianTerdekat = await Kajian.findOne({
+        const kajianTerdekat = await Kajian.findAll({
             where: {
                 ustadzId,
                 tanggal_waktu: { [Op.gte]: new Date() }
@@ -99,7 +99,7 @@ exports.ustadzOverview = async (req, res) => {
             order: [['tanggal_waktu', 'ASC']]
         });
 
-        const blogTerbaru = await Blog.findOne({
+        const blogTerbaru = await Blog.findAll({
             where: { ustadzId },
             order: [['createdAt', 'DESC']]
         });

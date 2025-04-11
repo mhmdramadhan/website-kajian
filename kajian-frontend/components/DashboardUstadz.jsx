@@ -18,11 +18,11 @@ export default function DashboardUstadz({ ustadzData }) {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold mb-4">Assalamu’alaikum, {ustadzData.namaUstadz}</h1>
+            <h1 className="text-2xl font-bold mb-4">Assalamu’alaikum, {ustadzData.nama}</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <StatCard title="Jumlah Kajian Saya" value={ustadzData.totalKajian} />
-                <StatCard title="Jumlah Blog Saya" value={ustadzData.totalBlog} />
+                <StatCard title="Jumlah Kajian Saya" value={ustadzData.jumlahKajian} />
+                <StatCard title="Jumlah Blog Saya" value={ustadzData.jumlahBlog} />
             </div>
 
             <div className="mb-6">

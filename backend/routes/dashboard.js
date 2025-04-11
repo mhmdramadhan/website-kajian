@@ -5,7 +5,7 @@ const { auth, authorizeRole, authorizeUstadzSelfOnly } = require('../middlewares
 
 router.get('/admin-overview', auth, authorizeRole(['admin']),
     dashboardController.adminOverview);
-router.get('/ustadz-overview', auth, authorizeUstadzSelfOnly, authorizeRole(['ustadz']),
+router.get('/ustadz-overview/:id', auth, authorizeUstadzSelfOnly, authorizeRole(['ustadz']),
     dashboardController.ustadzOverview);
 
 module.exports = router;
