@@ -34,13 +34,7 @@ export default async function DashboardPage() {
     return (
         <div className="p-4">
             {session.user.role === 'admin' && adminData && (
-                <>
-                    <div className="flex justify-between items-center mb-4">
-                        <h1 className="text-2xl font-bold">Dashboard Admin</h1>
-                        <p className="text-gray-500">Selamat datang, {session.user.name}</p>
-                    </div>
-                    <DashboardAdmin adminData={adminData} />
-                </>
+                <DashboardAdmin adminData={adminData} />
             )}
 
             {session.user.role === 'ustadz' && ustadzData && (
