@@ -17,10 +17,7 @@ export default function DashboardAdmin({ adminData }) {
     if (!adminData) {
         return <div>Loading...</div>;
     }
-
-    console.log("Admin data:", adminData);
-
-
+    
     return (
         <div>
             <h1 className="text-2xl font-bold mb-4">Halo Aadmin!</h1>
