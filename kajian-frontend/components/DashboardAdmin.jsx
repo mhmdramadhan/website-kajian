@@ -1,5 +1,8 @@
 'use client';
 
+import { getSession, signOut } from 'next-auth/react';
+import { toast } from 'sonner';
+import api from '@/utils/api';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -10,14 +13,41 @@ import {
     Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { useState, useEffect } from 'react';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-export default function DashboardAdmin({ adminData }) {
+export default function DashboardAdmin() {
+    const [adminData, setAdminData] = useState(null);
+
+    // ambil data
+    useEffect(() => {
+        const fetchData = async () => {
+            const session = await getSession();
+            try {
+                const res = await api.get('/dashboard/admin-overview', {
+                    headers: { Authorization: `Bearer ${session?.user?.token}` }
+                });
+                setAdminData(res.data);
+            } catch (err) {
+                console.log('Gagal mengambil data dashboard:', err?.response?.data?.message);
+
+                if (err?.response?.data?.message === 'Token tidak valid') {
+                    toast.error('Sesi login kamu sudah habis. Silakan login ulang.');
+                    setTimeout(() => {
+                        signOut({ callbackUrl: '/admin/login' });
+                    }, 2000);
+                }
+            }
+        };
+
+        fetchData();
+    }, []);
+
     if (!adminData) {
         return <div>Loading...</div>;
     }
-    
+
     return (
         <div>
             <h1 className="text-2xl font-bold mb-4">Halo Aadmin!</h1>
