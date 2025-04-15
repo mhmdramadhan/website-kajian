@@ -1,32 +1,30 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { useTable, useSortBy, usePagination } from '@tanstack/react-table';
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function TableUstadz({ ustadzList, token }) {
-    const [data, setData] = useState(ustadzList);
+    const router = useRouter();
 
-    const handleDelete = async (id) => {
-        const confirm = window.confirm("Yakin ingin menghapus ustadz ini?");
-        if (!confirm) return;
+    async function handleDelete(id) {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/ustadz/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
 
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/ustadz/${id}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (!res.ok) throw new Error("Gagal hapus");
-
-            toast.success("Ustadz berhasil dihapus");
-            setData(data.filter((u) => u.id !== id));
-        } catch (err) {
-            toast.error("Terjadi kesalahan saat menghapus");
+        if (res.ok) {
+            toast.success("Berhasil dihapus");
+            router.refresh(); // SSR reload
+        } else {
+            toast.error("Gagal menghapus ustadz");
         }
-    };
+    }
+
+    const data = ustadzList;
+
 
     return (
         <div className="bg-white shadow rounded p-4 overflow-x-auto">
@@ -51,9 +49,8 @@ export default function TableUstadz({ ustadzList, token }) {
                             <td className="p-2 border space-x-2">
                                 <button className="text-blue-600 hover:underline">Edit</button>
                                 <button
-                                    className="text-red-600 hover:underline"
                                     onClick={() => handleDelete(ustadz.id)}
-                                >
+                                    className="text-red-600 hover:underline">
                                     Hapus
                                 </button>
                             </td>

@@ -1,5 +1,3 @@
-// /app/admin/(admin)/ustadz/page.js
-
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
