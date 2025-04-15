@@ -1,4 +1,3 @@
-'use client';
 // app/admin/layout.js
 // import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from 'sonner';

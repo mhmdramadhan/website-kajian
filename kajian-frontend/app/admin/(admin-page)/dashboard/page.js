@@ -9,8 +9,6 @@ import DashboardUstadz from "@/components/DashboardUstadz";
 export default async function DashboardPage() {
     const session = await getServerSession(authOptions);
     if (!session) redirect("/admin/login");
-
-    console.log(session.user);
     
     if (session.user.role == 'admin') {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/dashboard/admin-overview`, {
@@ -24,8 +22,7 @@ export default async function DashboardPage() {
 
         const data = await res.json();
 
-        console.log(data);
-        
+        // console.log(data);
 
         return (
             <div className="p-4">
