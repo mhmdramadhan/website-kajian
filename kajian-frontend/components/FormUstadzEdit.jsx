@@ -7,6 +7,7 @@ import Image from 'next/image';
 
 export default function FormUstadzEdit({ ustadz, token }) {
     const router = useRouter();
+    const [previewFoto, setPreviewFoto] = useState(null);
     const [form, setForm] = useState({
         nama: ustadz.nama || '',
         bio: ustadz.bio || '',
@@ -17,10 +18,14 @@ export default function FormUstadzEdit({ ustadz, token }) {
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
-        setForm((prev) => ({
-            ...prev,
-            [name]: files ? files[0] : value,
-        }));
+
+        if (files) {
+            const file = files[0];
+            setForm((prev) => ({ ...prev, [name]: file }));
+            setPreviewFoto(URL.createObjectURL(file));
+        } else {
+            setForm((prev) => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -114,6 +119,18 @@ export default function FormUstadzEdit({ ustadz, token }) {
                         <Image
                             src={`${process.env.NEXT_PUBLIC_API_BASE}/${ustadz.foto}`}
                             alt={ustadz.nama}
+                            width={228}
+                            height={128}
+                            className="object-cover rounded border"
+                        />
+                    </div>
+                )}
+                {previewFoto && (
+                    <div className="mb-2">
+                        <p className="text-sm text-gray-600 mb-1">Preview Foto:</p>
+                        <Image
+                            src={previewFoto}
+                            alt="Preview"
                             width={228}
                             height={128}
                             className="object-cover rounded border"

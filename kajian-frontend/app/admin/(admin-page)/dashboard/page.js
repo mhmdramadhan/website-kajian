@@ -6,6 +6,12 @@ import { redirect } from "next/navigation";
 import DashboardAdmin from "@/components/DashboardAdmin";
 import DashboardUstadz from "@/components/DashboardUstadz";
 
+// meta data
+export const metadata = {
+    title: "Dashboard",
+    description: "Dashboard Admin",
+};
+
 export default async function DashboardPage() {
     const session = await getServerSession(authOptions);
     if (!session) redirect("/admin/login");

@@ -3,6 +3,12 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import TableUstadz from "@/components/TableUstadz";
 
+// meta data
+export const metadata = {
+    title: "Ustadz",
+    description: "Manajemen Ustadz",
+};
+
 export default async function UstadzPage() {
     const session = await getServerSession(authOptions);
     if (!session) redirect("/admin/login");

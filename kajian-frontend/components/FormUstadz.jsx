@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 export default function FormTambahUstadz({ token }) {
     const router = useRouter();
+    const [previewFoto, setPreviewFoto] = useState(null);
     const [form, setForm] = useState({
         nama: '',
         bio: '',
@@ -48,10 +50,14 @@ export default function FormTambahUstadz({ token }) {
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
-        setForm((prev) => ({
-            ...prev,
-            [name]: files ? files[0] : value,
-        }));
+
+        if (files) {
+            const file = files[0];
+            setForm((prev) => ({ ...prev, [name]: file }));
+            setPreviewFoto(URL.createObjectURL(file));
+        } else {
+            setForm((prev) => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -140,6 +146,18 @@ export default function FormTambahUstadz({ token }) {
 
                 <div>
                     <label className="block font-semibold">Foto</label>
+                    {previewFoto && (
+                        <div className="mb-2">
+                            <p className="text-sm text-gray-600 mb-1">Preview Foto:</p>
+                            <Image
+                                src={previewFoto}
+                                alt="Preview"
+                                width={228}
+                                height={128}
+                                className="object-cover rounded border"
+                            />
+                        </div>
+                    )}
                     <input
                         type="file"
                         name="foto"

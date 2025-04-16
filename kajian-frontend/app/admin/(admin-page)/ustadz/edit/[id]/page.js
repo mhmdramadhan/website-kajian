@@ -3,6 +3,12 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import FormEditUstadz from "@/components/FormUstadzEdit";
 
+// meta data
+export const metadata = {
+    title: "Edit Ustadz",
+    description: "Edit Ustadz",
+};
+
 export default async function EditUstadzPage({ params }) {
     const session = await getServerSession(authOptions);
     if (!session) redirect("/admin/login");
