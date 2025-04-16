@@ -1,10 +1,22 @@
 'use client'
 
+import { signOut } from 'next-auth/react';
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { toast } from "sonner";
 
 export default function TableUstadz({ ustadzList, token }) {
     const router = useRouter();
+
+    useEffect(() => {
+        // jika token habis
+        if (ustadzList?.message === 'Token tidak valid') {
+            toast.error('Sesi login kamu sudah habis. Silakan login ulang.');
+            setTimeout(() => {
+                signOut({ callbackUrl: '/admin/login' });
+            }, 5000);
+        }
+    }, [ustadzList]);
 
     async function handleDelete(id) {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/ustadz/${id}`, {
