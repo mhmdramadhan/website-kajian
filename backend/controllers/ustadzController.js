@@ -1,9 +1,31 @@
 const { Ustadz } = require('../models');
+const { Op } = require('sequelize');
 
 exports.getAll = async (req, res) => {
     try {
-        const data = await Ustadz.findAll();
-        res.json(data);
+        const { page = 1, limit = 10, search = '', sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
+
+        const offset = (page - 1) * limit;
+
+        const whereClause = search
+            ? {
+                nama: {
+                    [Op.like]: `%${search}%`,
+                },
+            }
+            : {};
+
+        const { count, rows } = await Ustadz.findAndCountAll({
+            where: whereClause,
+            limit: parseInt(limit),
+            offset: parseInt(offset),
+            order: [[sortBy, sortOrder]],
+        });
+
+        res.json({
+            data: rows,
+            total: count,
+        });
     } catch (err) {
         res.status(500).json({ message: 'Gagal mengambil data ustadz', error: err.message });
     }
