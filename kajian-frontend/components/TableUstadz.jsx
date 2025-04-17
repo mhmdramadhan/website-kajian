@@ -4,21 +4,17 @@ import Image from 'next/image'
 import Link from "next/link";
 import { signOut } from 'next-auth/react';
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { toast } from "sonner";
 
 export default function TableUstadz({ ustadzList, token }) {
     const router = useRouter();
 
-    useEffect(() => {
-        // jika token habis
-        if (ustadzList?.message === 'Token tidak valid') {
-            toast.error('Sesi login kamu sudah habis. Silakan login ulang.');
-            setTimeout(() => {
-                signOut({ callbackUrl: '/admin/login' });
-            }, 5000);
-        }
-    }, [ustadzList]);
+    if (ustadzList?.message === 'Token tidak valid') {
+        toast.error('Sesi login kamu sudah habis. Silakan login ulang.');
+        setTimeout(() => {
+            signOut({ callbackUrl: '/admin/login' });
+        }, 3000);
+    }
 
     async function handleDelete(id) {
         const konfirmasi = confirm("Yakin ingin menghapus ustadz ini?");
