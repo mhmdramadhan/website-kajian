@@ -1,14 +1,13 @@
 'use client'
 
-import Image from 'next/image'
+import { signOut } from "next-auth/react";
 import Link from "next/link";
-import { signOut } from 'next-auth/react';
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-export default function TableUstadz({ token }) {
-    const [ustadzList, setUstadzList] = useState([]);
+
+export default function TableKajian({ token }) {
+    const [kajianList, setKajianList] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(5);
@@ -18,13 +17,13 @@ export default function TableUstadz({ token }) {
     const [sortOrder, setSortOrder] = useState('DESC');
     const router = useRouter();
     const totalPages = Math.ceil(totalItems / pageSize);
+    
 
-
-    // Filter & paginate data
+    // fetch data kajian
     const fetchData = async () => {
         setLoading(true);
         const res = await fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE}/api/ustadz?page=${page}&limit=${pageSize}&search=${searchQuery}&sortBy=${sortBy}&sortOrder=${sortOrder}`,
+            `${process.env.NEXT_PUBLIC_API_BASE}/api/kajian?page=${page}&limit=${pageSize}&search=${searchQuery}&sortBy=${sortBy}&sortOrder=${sortOrder}`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -42,14 +41,20 @@ export default function TableUstadz({ token }) {
         }
         // handle if token expired
 
-        // console.log('data fetched:', data); // 👈 Cek data ini setelah delete
-        setUstadzList(data.data);
+        if (!res.ok) {
+            toast.error('Gagal mengambil data kajian');
+            setLoading(false);
+            return;
+        }
+        setKajianList(data.data);
         setTotalItems(data.total);
         setLoading(false);
     };
 
+    console.log(kajianList);
+    
 
-    // sort ustadz
+    // sort kajian table
     const handleSort = (field) => {
         if (sortBy === field) {
             setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC');
@@ -58,41 +63,62 @@ export default function TableUstadz({ token }) {
             setSortOrder('ASC');
         }
         setPage(1); // reset ke halaman 1 saat sorting berubah
-    };
+    }
 
+    // handle search
+    const handleSearch = (e) => {
+        setSearchQuery(e.target.value);
+        setPage(1); // reset ke halaman 1 saat search berubah
+    }
+
+    // handle delete kajian
     async function handleDelete(id) {
-        const konfirmasi = confirm("Yakin ingin menghapus ustadz ini?");
+        const konfirmasi = confirm("Yakin ingin menghapus kajian ini?");
         if (!konfirmasi) return;
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/ustadz/${id}`, {
-                method: "DELETE",
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/kajian/${id}`, {
+                method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-
-            console.log('Response status:', res.status);
-            const data = await res.json();
-            console.log('Response data:', data);
-
             if (res.ok) {
-                toast.success("Ustadz berhasil dihapus!");
-                fetchData(); // Panggil ulang fetch, bukan router.refresh
+                toast.success('Kajian berhasil dihapus');
+                fetchData();
             } else {
-                console.log(data);
-
-                toast.error(data.message || "Gagal menghapus ustadz");
+                toast.error('Gagal menghapus kajian');
             }
-        } catch (err) {
-            toast.error("Terjadi kesalahan saat menghapus");
+        } catch (error) {
+            console.error(error);
+            toast.error('Terjadi kesalahan saat menghapus kajian');
         }
     }
 
+    // handle edit kajian
+    const handleEdit = (id) => {
+        router.push(`/admin/kajian/${id}`);
+    }
+
+
+    /**
+ * Hook useEffect untuk mengambil data setiap kali dependensi berubah.
+ * 
+ * Efek ini akan dipicu setiap kali state `page`, `pageSize`, `searchQuery`, 
+ * `sortBy`, atau `sortOrder` berubah. Fungsi ini memanggil `fetchData` 
+ * untuk mengambil daftar data kajian terbaru dari API.
+ * 
+ * Dependensi:
+ * - `page`: Nomor halaman saat ini untuk paginasi.
+ * - `pageSize`: Jumlah item per halaman.
+ * - `searchQuery`: String pencarian untuk memfilter hasil.
+ * - `sortBy`: Field yang digunakan untuk pengurutan data.
+ * - `sortOrder`: Urutan pengurutan (misalnya, 'ASC' atau 'DESC').
+ */
     useEffect(() => {
         fetchData();
-    }, [page, pageSize, searchQuery,
-        sortBy, sortOrder]); // Memastikan fetchData dipanggil saat state ini berubah
+    }, [page, pageSize, searchQuery, sortBy, sortOrder]);
+
 
     return (
         <div className="bg-white shadow rounded-2xl p-4 overflow-x-auto ">
@@ -167,8 +193,8 @@ export default function TableUstadz({ token }) {
                         </tr>
                     </thead>
                     <tbody>
-                        {ustadzList && ustadzList.length > 0 ? (
-                            ustadzList.map((ustadz) => (
+                        {kajianList && kajianList.length > 0 ? (
+                            kajianList.map((ustadz) => (
                                 <tr key={ustadz.id}>
                                     <td className="p-2 border">{ustadz.nama}</td>
                                     <td className="p-2 border">{ustadz.bio}</td>
@@ -231,5 +257,7 @@ export default function TableUstadz({ token }) {
                 </button>
             </div>
         </div>
-    );
+    )
+
+
 }

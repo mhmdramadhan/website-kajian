@@ -2,7 +2,7 @@ const { Kajian, Ustadz, User } = require('../models');
 const { Op } = require('sequelize');
 
 exports.getAll = async (req, res) => {
-    const { ustadzId, tanggal, search, page = 1, limit = 10, sortBy = 'tanggal_waktu', order = 'asc' } = req.query;
+    const { ustadzId, tanggal, search, page = 1, limit = 10, sortBy = 'tanggal_waktu', sortOrder = 'asc' } = req.query;
 
     const where = {
         deletedAt: null // soft delete support
@@ -31,17 +31,21 @@ exports.getAll = async (req, res) => {
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
     try {
-        const list = await Kajian.findAll({
+        const { count, rows } = await Kajian.findAndCountAll({
             where,
             include: [
                 { model: Ustadz, as: 'ustadz' },
                 { model: User, as: 'creator' }
             ],
-            order: [[sortBy, order]],
+            order: [[sortBy, sortOrder]],
             limit: parseInt(limit),
             offset
         });
-        res.json(list);
+
+        res.json({
+            data: rows,
+            total: count,
+        });
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err });
     }
