@@ -12,19 +12,28 @@ import {
     Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { useEffect } from 'react';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export default function DashboardAdmin({ adminData }) {
+
+    useEffect(() => {
+        if (adminData?.message === 'Token tidak valid') {
+            toast.error('Sesi login kamu sudah habis. Silakan login ulang.');
+            setTimeout(() => {
+                signOut({ callbackUrl: '/admin/login' });
+            }, 3000);
+        }
+    }, [adminData]);
+
     if (!adminData) {
         return <div className="text-center text-gray-500">Memuat data dashboard...</div>;
     }
 
     if (adminData?.message === 'Token tidak valid') {
-        toast.error('Sesi login kamu sudah habis. Silakan login ulang.');
-        setTimeout(() => {
-            signOut({ callbackUrl: '/admin/login' });
-        }, 3000);
+        // Tampilkan placeholder sementara
+        return <div className="text-center text-red-500">Sesi tidak valid. Mengarahkan ke halaman login...</div>;
     }
 
 

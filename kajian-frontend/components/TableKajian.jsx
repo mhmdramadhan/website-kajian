@@ -1,6 +1,7 @@
 'use client'
 
 import { signOut } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -17,7 +18,7 @@ export default function TableKajian({ token }) {
     const [sortOrder, setSortOrder] = useState('DESC');
     const router = useRouter();
     const totalPages = Math.ceil(totalItems / pageSize);
-    
+
 
     // fetch data kajian
     const fetchData = async () => {
@@ -50,9 +51,6 @@ export default function TableKajian({ token }) {
         setTotalItems(data.total);
         setLoading(false);
     };
-
-    console.log(kajianList);
-    
 
     // sort kajian table
     const handleSort = (field) => {
@@ -124,7 +122,7 @@ export default function TableKajian({ token }) {
         <div className="bg-white shadow rounded-2xl p-4 overflow-x-auto ">
             <Link href="/admin/ustadz/tambah">
                 <button className="bg-blue-600 text-white px-4 py-2 rounded mb-4 hover:bg-blue-700 transition">
-                    + Tambah Ustadz
+                    + Tambah Kajian
                 </button>
             </Link>
 
@@ -132,7 +130,7 @@ export default function TableKajian({ token }) {
             <div className="flex justify-between mb-4 items-center">
                 <input
                     type="text"
-                    placeholder="Cari ustadz..."
+                    placeholder="Cari Judul kajian..."
                     className="border px-3 py-2 rounded w-full max-w-xs"
                     value={searchQuery}
                     onChange={(e) => {
@@ -182,28 +180,28 @@ export default function TableKajian({ token }) {
                 <table className="w-full border text-sm">
                     <thead className="bg-gray-100 text-left">
                         <tr>
-                            <th className="p-2 border" onClick={() => handleSort('nama')}>
-                                Nama
-                                {sortBy === 'nama' ? (sortOrder === 'ASC' ? '▲' : '▼') : ''}
+                            <th className="p-2 border" onClick={() => handleSort('judul')}>
+                                Judul
+                                {sortBy === 'judul' ? (sortOrder === 'ASC' ? '▲' : '▼') : ''}
                             </th>
-                            <th className="p-2 border">Bio</th>
-                            <th className="p-2 border">Kontak</th>
-                            <th className="p-2 border">Foto</th>
+                            <th className="p-2 border">Banner</th>
+                            <th className="p-2 border">Tanggal Waktu</th>
+                            <th className="p-2 border">Lokasi</th>
+                            <th className="p-2 border">Link Lokasi</th>
+                            <th className="p-2 border">Materi</th>
                             <th className="p-2 border">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         {kajianList && kajianList.length > 0 ? (
-                            kajianList.map((ustadz) => (
-                                <tr key={ustadz.id}>
-                                    <td className="p-2 border">{ustadz.nama}</td>
-                                    <td className="p-2 border">{ustadz.bio}</td>
-                                    <td className="p-2 border">{ustadz.kontak}</td>
+                            kajianList.map((kajian) => (
+                                <tr key={kajian.id}>
+                                    <td className="p-2 border">{kajian.judul}</td>
                                     <td className="p-2 border">
-                                        {ustadz.foto ? (
+                                        {kajian.banner ? (
                                             <Image
-                                                src={`${process.env.NEXT_PUBLIC_API_BASE}/${ustadz.foto}`}
-                                                alt={ustadz.nama}
+                                                src={`${process.env.NEXT_PUBLIC_API_BASE}/${kajian.banner}`}
+                                                alt={kajian.judul}
                                                 width={500}
                                                 height={500}
                                                 className="w-16 h-16 object-cover rounded"
@@ -212,12 +210,40 @@ export default function TableKajian({ token }) {
                                             <span>Tidak ada foto</span>
                                         )}
                                     </td>
+                                    <td className="p-2 border">
+                                        {new Date(kajian.tanggal_waktu).toLocaleString('id-ID', {
+                                            weekday: 'long',
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                        })}
+                                    </td>
+                                    <td className="p-2 border">{kajian.lokasi}</td>
+                                    <td className="p-2 border">
+                                        {kajian.link_lokasi ? (
+                                            <a
+                                                href={kajian.link_lokasi}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="bg-blue-100 text-blue-100 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-blue-900 dark:text-blue-300"
+                                            >
+                                                {kajian.judul}
+                                            </a>
+                                        ) : (
+                                            <span>Tidak ada link</span>
+                                        )}
+                                    </td>
+                                    <td className="p-2 border space-x-2">
+                                        {kajian.materi}
+                                    </td>
                                     <td className="p-2 border space-x-2">
                                         <button
-                                            onClick={() => router.push(`/admin/ustadz/edit/${ustadz.id}`)}
+                                            onClick={() => router.push(`/admin/kajian/edit/${kajian.id}`)}
                                             className="text-blue-600 hover:underline">Edit</button>
                                         <button
-                                            onClick={() => handleDelete(ustadz.id)}
+                                            onClick={() => handleDelete(kajian.id)}
                                             className="text-red-600 hover:underline">
                                             Hapus
                                         </button>

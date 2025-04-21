@@ -20,7 +20,7 @@ exports.login = async (req, res) => {
             id: user.id,
             role: user.role,
             ustadzId: user.ustadzId
-        }, JWT_SECRET, { expiresIn: '2h' });
+        }, JWT_SECRET, { expiresIn: '10s' });
 
         // Set token ke cookie
         res.cookie('token', token, {
