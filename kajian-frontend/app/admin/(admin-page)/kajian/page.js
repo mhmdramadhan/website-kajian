@@ -13,11 +13,10 @@ export default async function UstadzPage() {
     const session = await getServerSession(authOptions);
     if (!session) redirect("/admin/login");
 
-
     return (
         <div className="p-4">
             <h1 className="text-2xl font-bold mb-4">Manajemen Kajian</h1>
-            <TableKajian token={session.user.token} />
+            <TableKajian session={session} />
         </div>
     );
 }

@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useEffect, useState } from 'react';
 
-export default function TableUstadz({ token }) {
+export default function TableUstadz({ session }) {
     const [ustadzList, setUstadzList] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [page, setPage] = useState(1);
@@ -18,34 +18,52 @@ export default function TableUstadz({ token }) {
     const [sortOrder, setSortOrder] = useState('DESC');
     const router = useRouter();
     const totalPages = Math.ceil(totalItems / pageSize);
+    const token = session.user.token;
 
 
     // Filter & paginate data
     const fetchData = async () => {
         setLoading(true);
-        const res = await fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE}/api/ustadz?page=${page}&limit=${pageSize}&search=${searchQuery}&sortBy=${sortBy}&sortOrder=${sortOrder}`,
-            {
+
+        try {
+            const baseUrl = `${process.env.NEXT_PUBLIC_API_BASE}/api/ustadz`;
+            const params = new URLSearchParams({
+                page,
+                limit: pageSize,
+                search: searchQuery,
+                sortBy,
+                sortOrder,
+            });
+
+            const res = await fetch(`${baseUrl}?${params.toString()}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
+            });
+
+            const data = await res.json();
+
+            if (data.message === 'Token tidak valid') {
+                toast.error('Sesi login kamu sudah habis. Silakan login ulang.');
+                setTimeout(() => {
+                    signOut({ callbackUrl: '/admin/login' });
+                }, 3000);
+                return;
             }
-        );
-        const data = await res.json();
 
-        // handle if token expired
-        if (data.message === 'Token tidak valid') {
-            toast.error('Sesi login kamu sudah habis. Silakan login ulang.');
-            setTimeout(() => {
-                signOut({ callbackUrl: '/admin/login' });
-            }, 3000);
+            if (!res.ok) {
+                toast.error('Gagal mengambil data kajian');
+                return;
+            }
+
+            setUstadzList(data.data);
+            setTotalItems(data.total);
+        } catch {
+            toast.error('Terjadi kesalahan saat mengambil data ustadz');
+            console.error('Error fetching ustadz data:', error);
+        } finally {
+            setLoading(false);
         }
-        // handle if token expired
-
-        // console.log('data fetched:', data); // 👈 Cek data ini setelah delete
-        setUstadzList(data.data);
-        setTotalItems(data.total);
-        setLoading(false);
     };
 
 

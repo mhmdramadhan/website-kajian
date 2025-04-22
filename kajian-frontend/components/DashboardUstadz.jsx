@@ -11,25 +11,26 @@ import {
     Legend,
 } from 'chart.js';
 import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export default function DashboardUstadz({ ustadzData }) {
 
     useEffect(() => {
-        if (adminData?.message === 'Token tidak valid') {
+        if (ustadzData?.message === 'Token tidak valid') {
             toast.error('Sesi login kamu sudah habis. Silakan login ulang.');
             setTimeout(() => {
                 signOut({ callbackUrl: '/admin/login' });
             }, 3000);
         }
-    }, [adminData]);
+    }, [ustadzData]);
 
     if (!ustadzData) {
         return <div className="text-center text-gray-500">Memuat data dashboard...</div>;
     }
 
-    if (adminData?.message === 'Token tidak valid') {
+    if (ustadzData?.message === 'Token tidak valid') {
         // Tampilkan placeholder sementara
         return <div className="text-center text-red-500">Sesi tidak valid. Mengarahkan ke halaman login...</div>;
     }

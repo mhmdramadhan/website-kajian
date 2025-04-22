@@ -5,9 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 
-export default function TableKajian({ token }) {
+export default function TableKajian({ session }) {
     const [kajianList, setKajianList] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [page, setPage] = useState(1);
@@ -18,38 +19,57 @@ export default function TableKajian({ token }) {
     const [sortOrder, setSortOrder] = useState('DESC');
     const router = useRouter();
     const totalPages = Math.ceil(totalItems / pageSize);
+    const token = session.user.token;
+    const role = session.user.role;
+    const ustadzId = session.user.ustadzId;
 
 
     // fetch data kajian
     const fetchData = async () => {
         setLoading(true);
-        const res = await fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE}/api/kajian?page=${page}&limit=${pageSize}&search=${searchQuery}&sortBy=${sortBy}&sortOrder=${sortOrder}`,
-            {
+        try {
+            const baseUrl = `${process.env.NEXT_PUBLIC_API_BASE}/api/kajian`;
+            const params = new URLSearchParams({
+                page,
+                limit: pageSize,
+                search: searchQuery,
+                sortBy,
+                sortOrder,
+            });
+
+            if (role === 'ustadz' && ustadzId) {
+                params.append('ustadzId', ustadzId);
+            }
+
+            const res = await fetch(`${baseUrl}?${params.toString()}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
+            });
+
+            const data = await res.json();
+
+            if (data.message === 'Token tidak valid') {
+                toast.error('Sesi login kamu sudah habis. Silakan login ulang.');
+                setTimeout(() => {
+                    signOut({ callbackUrl: '/admin/login' });
+                }, 3000);
+                return;
             }
-        );
-        const data = await res.json();
 
-        // handle if token expired
-        if (data.message === 'Token tidak valid') {
-            toast.error('Sesi login kamu sudah habis. Silakan login ulang.');
-            setTimeout(() => {
-                signOut({ callbackUrl: '/admin/login' });
-            }, 3000);
-        }
-        // handle if token expired
+            if (!res.ok) {
+                toast.error('Gagal mengambil data kajian');
+                return;
+            }
 
-        if (!res.ok) {
-            toast.error('Gagal mengambil data kajian');
+            setKajianList(data.data);
+            setTotalItems(data.total);
+        } catch (error) {
+            console.error('Fetch error:', error);
+            toast.error('Terjadi kesalahan saat mengambil data');
+        } finally {
             setLoading(false);
-            return;
         }
-        setKajianList(data.data);
-        setTotalItems(data.total);
-        setLoading(false);
     };
 
     // sort kajian table
@@ -184,6 +204,7 @@ export default function TableKajian({ token }) {
                                 Judul
                                 {sortBy === 'judul' ? (sortOrder === 'ASC' ? '▲' : '▼') : ''}
                             </th>
+                            <th className="p-2 border">Ustadz</th>
                             <th className="p-2 border">Banner</th>
                             <th className="p-2 border">Tanggal Waktu</th>
                             <th className="p-2 border">Lokasi</th>
@@ -197,6 +218,18 @@ export default function TableKajian({ token }) {
                             kajianList.map((kajian) => (
                                 <tr key={kajian.id}>
                                     <td className="p-2 border">{kajian.judul}</td>
+                                    <td className="p-2 border">
+                                        {kajian.ustadz ? (
+                                            <Link
+                                                href={`/admin/ustadz/${kajian.ustadz.id}`}
+                                                className="text-blue-600 hover:underline"
+                                            >
+                                                {kajian.ustadz.nama}
+                                            </Link>
+                                        ) : (
+                                            <span>Tidak ada ustadz</span>
+                                        )}
+                                    </td>
                                     <td className="p-2 border">
                                         {kajian.banner ? (
                                             <Image

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import Image from 'next/image';
 
-export default function FormKajian({ token, ustadzList }) {
+export default function FormKajian({ token, ustadzList, session }) {
     const router = useRouter();
     const [previewFoto, setPreviewFoto] = useState(null);
     const [form, setForm] = useState({
@@ -189,11 +189,23 @@ export default function FormKajian({ token, ustadzList }) {
                     >
                         <option value="">Pilih Ustadz</option>
                         {/* Assuming you have a list of ustadz from props or state */}
-                        {ustadzList.data.map((ustadz) => (
-                            <option key={ustadz.id} value={ustadz.id}>
-                                {ustadz.nama}
-                            </option>
-                        ))}
+                        {session.user.role === 'admin' && (
+                            ustadzList.data.map((ustadz) => (
+                                <option key={ustadz.id} value={ustadz.id}>
+                                    {ustadz.nama}
+                                </option>
+                            )
+                            ))}
+                        {session.user.role === 'ustadz' && (
+                            ustadzList.data.map((ustadz) => (
+                                ustadz.id === session.user.ustadzId && (
+                                    <option key={ustadz.id} value={ustadz.id}>
+                                        {ustadz.nama}
+                                    </option>
+                                )
+                            ))
+                        )}
+
                     </select>
                 </div>
 

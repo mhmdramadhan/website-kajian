@@ -35,7 +35,9 @@ exports.getOne = async (req, res) => {
     try {
         const ustadz = await Ustadz.findByPk(req.params.id);
         if (!ustadz) return res.status(404).json({ message: 'Ustadz tidak ditemukan' });
-        res.json(ustadz);
+        res.json({
+            data: ustadz,
+        });
     } catch (err) {
         res.status(500).json({ message: 'Gagal mengambil data ustadz', error: err.message });
     }

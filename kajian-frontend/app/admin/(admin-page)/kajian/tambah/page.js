@@ -15,20 +15,22 @@ export default async function TambahKajianPage() {
     if (!session) redirect("/admin/login");
 
     // get ustadz list
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/ustadz`, {
+    const url = `${process.env.NEXT_PUBLIC_API_BASE}/api/ustadz`;
+
+    const res = await fetch(`${url}`, {
         method: "GET",
         headers: {
             Authorization: `Bearer ${session.user.token}`,
         },
         cache: "no-store",
     });
+
     const ustadzList = await res.json();
-    // console.log(ustadzList);
-    
+
     return (
         <div className="p-4">
             <h1 className="text-2xl font-bold mb-4">Tambah Kajian</h1>
-            <FormKajian token={session.user.token} ustadzList={ustadzList} />
+            <FormKajian token={session.user.token} ustadzList={ustadzList} session={session} />
         </div>
     );
 }
