@@ -1,5 +1,7 @@
 const { Ustadz } = require('../models');
 const { Op } = require('sequelize');
+const fs = require('fs');
+const path = require('path');
 
 exports.getAll = async (req, res) => {
     try {
@@ -76,6 +78,16 @@ exports.remove = async (req, res) => {
     try {
         const ustadz = await Ustadz.findByPk(req.params.id);
         if (!ustadz) return res.status(404).json({ message: 'Ustadz tidak ditemukan' });
+
+        // Hapus file foto jika ada
+        if (ustadz.foto) {
+            const fotoPath = path.resolve(ustadz.foto);
+            fs.unlink(fotoPath, (err) => {
+                if (err) {
+                    console.error(`Gagal menghapus file: ${fotoPath}`, err);
+                }
+            });
+        }
 
         await ustadz.destroy();
         res.json({ message: 'Ustadz berhasil dihapus' });

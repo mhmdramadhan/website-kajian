@@ -1,5 +1,7 @@
 const { Kajian, Ustadz, User } = require('../models');
 const { Op } = require('sequelize');
+const fs = require('fs');
+const path = require('path');
 
 exports.getAll = async (req, res) => {
     const { ustadzId, tanggal, search, page = 1, limit = 10, sortBy = 'tanggal_waktu', sortOrder = 'asc' } = req.query;
@@ -126,6 +128,16 @@ exports.remove = async (req, res) => {
     try {
         const kajian = await Kajian.findByPk(req.params.id);
         if (!kajian) return res.status(404).json({ message: 'Kajian tidak ditemukan' });
+
+        // Hapus file banner jika ada
+        if (kajian.banner) {
+            const bannerPath = path.resolve(kajian.banner);
+            fs.unlink(bannerPath, (err) => {
+                if (err) {
+                    console.error(`Gagal menghapus file: ${bannerPath}`, err);
+                }
+            });
+        }
 
         await kajian.destroy();
         res.json({ message: 'Kajian berhasil dihapus' });
