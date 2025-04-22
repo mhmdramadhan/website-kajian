@@ -120,7 +120,7 @@ export default function TableKajian({ token }) {
 
     return (
         <div className="bg-white shadow rounded-2xl p-4 overflow-x-auto ">
-            <Link href="/admin/ustadz/tambah">
+            <Link href="/admin/kajian/tambah">
                 <button className="bg-blue-600 text-white px-4 py-2 rounded mb-4 hover:bg-blue-700 transition">
                     + Tambah Kajian
                 </button>

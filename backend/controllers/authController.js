@@ -20,14 +20,14 @@ exports.login = async (req, res) => {
             id: user.id,
             role: user.role,
             ustadzId: user.ustadzId
-        }, JWT_SECRET, { expiresIn: '10s' });
+        }, JWT_SECRET, { expiresIn: '2h' });
 
         // Set token ke cookie
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // Hanya kirim cookie di HTTPS
-            maxAge: 2 * 24 * 60 * 60 * 1000 // 2 hari
-        });
+        // res.cookie('token', token, {
+        //     httpOnly: true,
+        //     secure: process.env.NODE_ENV === 'production', // Hanya kirim cookie di HTTPS
+        //     maxAge: 2 * 24 * 60 * 60 * 1000 // 2 hari
+        // });
 
         // Kirim token dan user ke client
         res.json({
