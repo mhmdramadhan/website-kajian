@@ -6,6 +6,9 @@ import { toast } from 'sonner';
 import Image from 'next/image';
 
 export default function FormUstadzEdit({ ustadz, token }) {
+    console.log('ustadz', ustadz);
+    
+
     const router = useRouter();
     const [previewFoto, setPreviewFoto] = useState(null);
     const [form, setForm] = useState({

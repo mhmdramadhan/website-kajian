@@ -13,7 +13,9 @@ export default async function EditUstadzPage({ params }) {
     const session = await getServerSession(authOptions);
     if (!session) redirect("/admin/login");
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/ustadz/${params.id}`, {
+    const data = await params;
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/ustadz/${data.id}`, {
         headers: {
             Authorization: `Bearer ${session.user.token}`,
         },
@@ -29,7 +31,7 @@ export default async function EditUstadzPage({ params }) {
     return (
         <div className="p-4">
             <h1 className="text-2xl font-bold mb-4">Edit Ustadz</h1>
-            <FormEditUstadz ustadz={ustadz} token={session.user.token} />
+            <FormEditUstadz ustadz={ustadz.data} token={session.user.token} />
         </div>
     );
 }
