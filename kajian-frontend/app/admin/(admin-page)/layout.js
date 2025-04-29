@@ -13,9 +13,9 @@ export default async function AdminPageLayout({ children, modal }) {
 
     return (
         <div className="flex">
+            <AdminHeader />
             <AdminSidebar />
             <div className="flex-1 ml-64">
-                <AdminHeader />
                 <main className="mt-16 p-6">{children}</main>
             </div>
             {modal}
