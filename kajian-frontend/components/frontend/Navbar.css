@@ -1,0 +1,8 @@
+html:not([data-scroll='0']) .navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background-color: #fff;
+  opacity: 0.9;
+  transition: 0.4s linear;
+}

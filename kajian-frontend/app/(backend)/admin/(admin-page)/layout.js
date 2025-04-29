@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth"; // file konfigurasi NextAuth kamu
 import { redirect } from "next/navigation";
 import AdminSidebar from '@/components/AdminSidebar';
 import AdminHeader from '@/components/AdminHeader';
+import { Toaster } from 'sonner';
 
 export default async function AdminPageLayout({ children, modal }) {
     const session = await getServerSession(authOptions);
@@ -13,6 +14,7 @@ export default async function AdminPageLayout({ children, modal }) {
 
     return (
         <div className="flex">
+            <Toaster position="top-center" />
             <AdminHeader />
             <AdminSidebar />
             <div className="flex-1 ml-64">
