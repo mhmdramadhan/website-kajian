@@ -58,7 +58,7 @@ export default function Home() {
     {/* end search */}
 
     {/* kajian */}
-    <section id="testimonial" className="mt-3">
+    <section id="lagiRame" className="mt-3">
       <div className="container">
         <div className="row h-100">
           <div className="col-lg-7 mx-auto text-center mb-6">
