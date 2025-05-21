@@ -33,7 +33,6 @@ export default async function DashboardPage() {
         return (
             <div className="p-4">
                 <DashboardAdmin adminData={data} />
-
             </div>
         );
     }

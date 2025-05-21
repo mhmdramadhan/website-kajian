@@ -53,6 +53,57 @@ exports.getAll = async (req, res) => {
     }
 };
 
+exports.getKajianFront = async (req, res) => {
+    const { ustadzId, tanggal, search, page = 1, limit = 10, sortBy = 'tanggal_waktu', sortOrder = 'asc' } = req.query;
+
+    const where = {
+        deletedAt: null // soft delete support
+    };
+
+    if (ustadzId) {
+        where.ustadzId = ustadzId;
+    }
+
+    if (tanggal) {
+        const dateStart = new Date(tanggal);
+        const dateEnd = new Date(tanggal);
+        dateEnd.setDate(dateEnd.getDate() + 1);
+        where.tanggal_waktu = {
+            [Op.gte]: dateStart,
+            [Op.lt]: dateEnd
+        };
+    }
+
+    if (search) {
+        where.judul = {
+            [Op.like]: `%${search}%`
+        };
+    }
+
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+
+    try {
+        const { count, rows } = await Kajian.findAndCountAll({
+            where,
+            attributes: ['id', 'judul', 'banner', 'tanggal_waktu', 'lokasi', 'link_lokasi'],
+            include: [
+                { model: Ustadz, as: 'ustadz' },
+                { model: User, as: 'creator' }
+            ],
+            order: [[sortBy, sortOrder]],
+            limit: parseInt(limit),
+            offset
+        });
+
+        res.json({
+            data: rows,
+            total: count,
+        });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err });
+    }
+};
+
 exports.getOne = async (req, res) => {
     try {
         const kajian = await Kajian.findByPk(req.params.id, { include: ['ustadz', 'creator'] });
