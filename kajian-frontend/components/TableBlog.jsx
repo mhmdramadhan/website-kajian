@@ -1,5 +1,6 @@
 'use client'
 
+import { fetchWithAuthClient } from "@/lib/fetchWithAuthClient";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -41,34 +42,13 @@ export default function TableBlog({ session }) {
                 params.append('ustadzId', ustadzId);
             }
 
-            const res = await fetch(`${baseUrl}?${params.toString()}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const data = await fetchWithAuthClient(`${baseUrl}?${params.toString()}`, token);
 
-            const data = await res.json();
-
-            console.log(data);
-            
-
-            if (data.message === 'Token tidak valid') {
-                toast.error('Sesi login kamu sudah habis. Silakan login ulang.');
-                setTimeout(() => {
-                    signOut({ callbackUrl: '/admin/login' });
-                }, 3000);
-                return;
-            }
-
-            if (!res.ok) {
-                toast.error('Gagal mengambil data blog');
-                return;
-            }
+            if (!data) return;
 
             setBlogList(data.data);
             setTotalItems(data.total);
         } catch (error) {
-            console.error('Fetch error:', error);
             toast.error('Terjadi kesalahan saat mengambil data');
         } finally {
             setLoading(false);
@@ -97,22 +77,9 @@ export default function TableBlog({ session }) {
         const konfirmasi = confirm("Yakin ingin menghapus blog ini?");
         if (!konfirmasi) return;
 
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/blog/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            if (res.ok) {
-                toast.success('Blog berhasil dihapus');
-                fetchData();
-            } else {
-                toast.error('Gagal menghapus blog');
-            }
-        } catch (error) {
-            console.error(error);
-            toast.error('Terjadi kesalahan saat menghapus blog');
+        const success = await deleteWithAuth(`${process.env.NEXT_PUBLIC_API_BASE}/api/blog/${id}`, token);
+        if (success) {
+            fetchData();
         }
     }
 
@@ -132,7 +99,18 @@ export default function TableBlog({ session }) {
  * - `sortOrder`: Urutan pengurutan (misalnya, 'ASC' atau 'DESC').
  */
     useEffect(() => {
-        fetchData();
+        const getData = async () => {
+            const baseUrl = `${process.env.NEXT_PUBLIC_API_BASE}/api/blog`;
+            const params = new URLSearchParams({ page, limit: pageSize, search: searchQuery, sortBy, sortOrder });
+
+            const data = await fetchWithAuthClient(`${baseUrl}?${params.toString()}`, token);
+            if (!data) return;
+
+            setBlogList(data.data);
+            setTotalItems(data.total);
+        };
+
+        getData();
     }, [page, pageSize, searchQuery, sortBy, sortOrder]);
 
 

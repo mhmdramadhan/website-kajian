@@ -1,6 +1,5 @@
 import TableBlog from "@/components/TableBlog";
-import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
+import { requireSession } from "@/lib/checkSession";
 
 export const metadata = {
     title: "Blog",
@@ -8,8 +7,7 @@ export const metadata = {
 };
 
 export default async function Page() {
-    const session = await getServerSession(authOptions);
-    if (!session) redirect("/admin/login");
+    const session = await requireSession();
 
     return (
         <div className="p-4">
