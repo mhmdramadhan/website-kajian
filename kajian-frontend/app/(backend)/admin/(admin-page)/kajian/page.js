@@ -1,7 +1,5 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import TableKajian from "@/components/TableKajian";
+import { requireSession } from "@/lib/checkSession";
 
 // meta data
 export const metadata = {
@@ -10,8 +8,7 @@ export const metadata = {
 };
 
 export default async function UstadzPage() {
-    const session = await getServerSession(authOptions);
-    if (!session) redirect("/admin/login");
+    const session = await requireSession();
 
     return (
         <div className="p-4">

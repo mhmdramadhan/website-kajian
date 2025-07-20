@@ -1,5 +1,7 @@
 'use client'
 
+import { deleteWithAuth } from "@/lib/deleteWithAuth";
+import { fetchWithAuthClient } from "@/lib/fetchWithAuthClient";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -41,31 +43,13 @@ export default function TableKajian({ session }) {
                 params.append('ustadzId', ustadzId);
             }
 
-            const res = await fetch(`${baseUrl}?${params.toString()}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const data = await fetchWithAuthClient(`${baseUrl}?${params.toString()}`, token);
 
-            const data = await res.json();
-
-            if (data.message === 'Token tidak valid') {
-                toast.error('Sesi login kamu sudah habis. Silakan login ulang.');
-                setTimeout(() => {
-                    signOut({ callbackUrl: '/admin/login' });
-                }, 3000);
-                return;
-            }
-
-            if (!res.ok) {
-                toast.error('Gagal mengambil data kajian');
-                return;
-            }
+            if (!data) return;
 
             setKajianList(data.data);
             setTotalItems(data.total);
         } catch (error) {
-            console.error('Fetch error:', error);
             toast.error('Terjadi kesalahan saat mengambil data');
         } finally {
             setLoading(false);
@@ -91,25 +75,12 @@ export default function TableKajian({ session }) {
 
     // handle delete kajian
     async function handleDelete(id) {
-        const konfirmasi = confirm("Yakin ingin menghapus kajian ini?");
+        const konfirmasi = confirm("Yakin ingin menghapus ustadz ini?");
         if (!konfirmasi) return;
 
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/kajian/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            if (res.ok) {
-                toast.success('Kajian berhasil dihapus');
-                fetchData();
-            } else {
-                toast.error('Gagal menghapus kajian');
-            }
-        } catch (error) {
-            console.error(error);
-            toast.error('Terjadi kesalahan saat menghapus kajian');
+        const success = await deleteWithAuth(`${process.env.NEXT_PUBLIC_API_BASE}/api/kajian/${id}`, token);
+        if (success) {
+            fetchData();
         }
     }
 
@@ -134,7 +105,18 @@ export default function TableKajian({ session }) {
  * - `sortOrder`: Urutan pengurutan (misalnya, 'ASC' atau 'DESC').
  */
     useEffect(() => {
-        fetchData();
+        const getData = async () => {
+            const baseUrl = `${process.env.NEXT_PUBLIC_API_BASE}/api/kajian`;
+            const params = new URLSearchParams({ page, limit: pageSize, search: searchQuery, sortBy, sortOrder });
+
+            const data = await fetchWithAuthClient(`${baseUrl}?${params.toString()}`, token);
+            if (!data) return;
+
+            setKajianList(data.data);
+            setTotalItems(data.total);
+        };
+
+        getData();
     }, [page, pageSize, searchQuery, sortBy, sortOrder]);
 
 

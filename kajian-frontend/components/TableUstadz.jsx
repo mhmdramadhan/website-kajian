@@ -6,6 +6,8 @@ import { signOut } from 'next-auth/react';
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useEffect, useState } from 'react';
+import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient';
+import { deleteWithAuth } from '@/lib/deleteWithAuth';
 
 export default function TableUstadz({ session }) {
     const [ustadzList, setUstadzList] = useState([]);
@@ -35,32 +37,14 @@ export default function TableUstadz({ session }) {
                 sortOrder,
             });
 
-            const res = await fetch(`${baseUrl}?${params.toString()}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const data = await fetchWithAuthClient(`${baseUrl}?${params.toString()}`, token);
 
-            const data = await res.json();
-
-            if (data.message === 'Token tidak valid') {
-                toast.error('Sesi login kamu sudah habis. Silakan login ulang.');
-                setTimeout(() => {
-                    signOut({ callbackUrl: '/admin/login' });
-                }, 3000);
-                return;
-            }
-
-            if (!res.ok) {
-                toast.error('Gagal mengambil data kajian');
-                return;
-            }
+            if (!data) return;
 
             setUstadzList(data.data);
             setTotalItems(data.total);
         } catch {
             toast.error('Terjadi kesalahan saat mengambil data ustadz');
-            console.error('Error fetching ustadz data:', error);
         } finally {
             setLoading(false);
         }
@@ -82,33 +66,25 @@ export default function TableUstadz({ session }) {
         const konfirmasi = confirm("Yakin ingin menghapus ustadz ini?");
         if (!konfirmasi) return;
 
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/ustadz/${id}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            console.log('Response status:', res.status);
-            const data = await res.json();
-            console.log('Response data:', data);
-
-            if (res.ok) {
-                toast.success("Ustadz berhasil dihapus!");
-                fetchData(); // Panggil ulang fetch, bukan router.refresh
-            } else {
-                console.log(data);
-
-                toast.error(data.message || "Gagal menghapus ustadz");
-            }
-        } catch (err) {
-            toast.error("Terjadi kesalahan saat menghapus");
+        const success = await deleteWithAuth(`${process.env.NEXT_PUBLIC_API_BASE}/api/ustadz/${id}`, token);
+        if (success) {
+            fetchData();
         }
     }
 
     useEffect(() => {
-        fetchData();
+        const getData = async () => {
+            const baseUrl = `${process.env.NEXT_PUBLIC_API_BASE}/api/ustadz`;
+            const params = new URLSearchParams({ page, limit: pageSize, search: searchQuery, sortBy, sortOrder });
+
+            const data = await fetchWithAuthClient(`${baseUrl}?${params.toString()}`, token);
+            if (!data) return;
+
+            setUstadzList(data.data);
+            setTotalItems(data.total);
+        };
+
+        getData();
     }, [page, pageSize, searchQuery,
         sortBy, sortOrder]); // Memastikan fetchData dipanggil saat state ini berubah
 

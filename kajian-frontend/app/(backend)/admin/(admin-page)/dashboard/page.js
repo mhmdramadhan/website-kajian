@@ -1,10 +1,7 @@
-// app/admin/dashboard/page.js
-
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import DashboardAdmin from "@/components/DashboardAdmin";
 import DashboardUstadz from "@/components/DashboardUstadz";
+import { requireSession } from "@/lib/checkSession";
+import { fetchWithAuthServer } from "@/lib/fetchWithAuthServer";
 
 // meta data
 export const metadata = {
@@ -13,23 +10,15 @@ export const metadata = {
 };
 
 export default async function DashboardPage() {
-    const session = await getServerSession(authOptions);
-    if (!session) redirect("/admin/login");
+    const session = await requireSession();
+    console.log(session);
     
-    if (session.user.role == 'admin') {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/dashboard/admin-overview`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${session.user.token}`,
-            },
-            cache: "no-store",
-        });
+    const { role, token, ustadzId } = session.user;
 
-        const data = await res.json();
+    let data;
 
-        // console.log(data);
-
+    if (role === "admin") {
+        data = await fetchWithAuthServer(`${process.env.NEXT_PUBLIC_API_BASE}/dashboard/admin-overview`, token);
         return (
             <div className="p-4">
                 <DashboardAdmin adminData={data} />
@@ -37,18 +26,8 @@ export default async function DashboardPage() {
         );
     }
 
-    if (session.user.role == 'ustadz') {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/dashboard/ustadz-overview/${session.user.ustadzId}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${session.user.token}`,
-            },
-            cache: "no-store",
-        });
-
-        const data = await res.json();
-
+    if (role === "ustadz") {
+        data = await fetchWithAuthServer(`${process.env.NEXT_PUBLIC_API_BASE}/dashboard/ustadz-overview/${ustadzId}`, token);
         return (
             <div className="p-4">
                 <DashboardUstadz ustadzData={data} />
@@ -56,12 +35,6 @@ export default async function DashboardPage() {
         );
     }
 
-
-
-
-
-
-
-
-
+    // optional fallback
+    return null;
 }
